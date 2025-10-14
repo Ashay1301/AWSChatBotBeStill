@@ -6,7 +6,13 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, GetCommand, UpdateCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import multer from 'multer';
+import { analyzeDocument } from './bedrockClient.js'; // Make sure this is imported
 
+// Configure multer for in-memory file storage
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+// === EXPRESS SETUP ===
 const app = express();
 const port = 3000;
 app.use(cors());
@@ -217,6 +223,44 @@ app.post("/api/chat", authenticateToken, async (req: Request, res: Response) => 
     }
 });
 
+// === NEW: FILE ANALYSIS ENDPOINT ===
+app.post("/api/analyze", authenticateToken, upload.single('document'), async (req: Request, res: Response) => {
+    if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded." });
+    }
+
+    try {
+        // Convert the file buffer to a string
+        const fileContent = req.file.buffer.toString('utf-8');
+
+        // Get the analysis from our Bedrock client
+        const analysisResult = await analyzeDocument(fileContent);
+
+        // Also add this exchange to the user's chat history for context
+        const userId = (req as any).user.username;
+        const getCommand = new GetCommand({ TableName: HISTORY_TABLE, Key: { userId } });
+        const { Item } = await docClient.send(getCommand);
+        let conversationHistory: ChatMessage[] = Item?.history || [];
+
+        conversationHistory.push({ role: "user", content: `(Analyzed document: ${req.file.originalname})` });
+        conversationHistory.push({ role: "assistant", content: analysisResult });
+
+        const updateCommand = new UpdateCommand({
+            TableName: HISTORY_TABLE,
+            Key: { userId },
+            UpdateExpression: "set history = :h",
+            ExpressionAttributeValues: { ":h": conversationHistory },
+        });
+        await docClient.send(updateCommand);
+
+        res.status(200).json({ analysis: analysisResult });
+
+    } catch (error) {
+        console.error("Analysis endpoint error:", error);
+        res.status(500).json({ message: "Failed to analyze the file." });
+    }
+});
+
 app.post("/api/clear", authenticateToken, async (req: Request, res: Response) => {
     const userId = (req as any).user.username;
 
@@ -228,6 +272,7 @@ app.post("/api/clear", authenticateToken, async (req: Request, res: Response) =>
     resetDataEntry();
     res.status(200).json({ message: `History cleared for ${userId}.` });
 });
+
 
 
 app.listen(port, () => {

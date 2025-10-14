@@ -1,5 +1,14 @@
+
+BackEnd
+---- Login & Register ----
 npm install bcryptjs jsonwebtoken
 npm install --save-dev @types/bcryptjs @types/jsonwebtoken
+
+---- File Upload ----
+npm install multer
+npm install --save-dev @types/multer
+
+
 
 FrontEnd
 npm install react-router-dom
