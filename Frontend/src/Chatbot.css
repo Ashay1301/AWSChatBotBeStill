@@ -245,3 +245,19 @@ code {
     width: 60px;
   }
 }
+
+
+
+.upload-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #8e24aa;
+  padding: 0 10px;
+  transition: color 0.2s;
+}
+
+.upload-button:hover {
+  color: #6a1b9a;
+}
