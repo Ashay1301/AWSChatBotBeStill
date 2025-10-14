@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal Advisor Chatbot</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        #chat-container { width: 500px; height: 700px; border: 1px solid #ccc; border-radius: 8px; display: flex; flex-direction: column; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        #chat-box { flex: 1; padding: 20px; overflow-y: auto; border-bottom: 1px solid #ccc; }
+        .message { margin-bottom: 15px; padding: 10px; border-radius: 10px; line-height: 1.4; }
+        .user { background-color: #e1f5fe; text-align: right; margin-left: auto; max-width: 80%; }
+        .bot { background-color: #f1f1f1; text-align: left; margin-right: auto; max-width: 80%; }
+        #input-area { display: flex; padding: 10px; }
+        #chat-input { flex: 1; border: 1px solid #ccc; border-radius: 5px; padding: 10px; font-size: 16px; }
+        #send-button { background-color: #007bff; color: white; border: none; border-radius: 5px; padding: 10px 15px; margin-left: 10px; cursor: pointer; }
+        #send-button:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="chat-box">
+            <div class="message bot">Hello! You can ask me legal questions or type "new entry" to add a record.</div>
+        </div>
+        <div id="input-area">
+            <input type="text" id="chat-input" placeholder="Type your message...">
+            <button id="send-button">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const chatBox = document.getElementById('chat-box');
+        const chatInput = document.getElementById('chat-input');
+        const sendButton = document.getElementById('send-button');
+
+        // Function to add a message to the chat display
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            messageDiv.textContent = text;
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to the bottom
+        }
+
+        async function sendMessage() {
+            const prompt = chatInput.value.trim();
+            if (!prompt) return;
+
+            addMessage(prompt, 'user');
+            chatInput.value = ''; // Clear the input box
+
+            try {
+                const response = await fetch('http://localhost:3000/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: prompt })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                addMessage(data.response, 'bot');
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('Sorry, something went wrong. Please check the server.', 'bot');
+            }
+        }
+
+        sendButton.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>

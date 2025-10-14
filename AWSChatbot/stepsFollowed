@@ -1,0 +1,5 @@
+npm install bcryptjs jsonwebtoken
+npm install --save-dev @types/bcryptjs @types/jsonwebtoken
+
+FrontEnd
+npm install react-router-dom
