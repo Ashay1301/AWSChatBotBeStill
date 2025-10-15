@@ -23,6 +23,7 @@ const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
 const HISTORY_TABLE = "ChatBotBeStill";
 const CREDENTIALS_TABLE = "ChatbotCredentials";
+const PROFILES_TABLE = "UserProfiles";
 const JWT_SECRET = "your_super_secret_key_change_this"; // IMPORTANT: Change this to a long, random string
 
 // === DATA ENTRY LOGIC (Unchanged) ===
@@ -65,27 +66,74 @@ app.post("/api/register", async (req, res) => {
     }
 
     try {
-        // Check if user already exists
+        // Check if user already exists (remains the same)
         const getCommand = new GetCommand({ TableName: CREDENTIALS_TABLE, Key: { username } });
         const { Item } = await docClient.send(getCommand);
         if (Item) {
             return res.status(409).json({ message: "Username already exists." });
         }
 
-        // Hash the password and save the new user
-        const hashedPassword = await bcrypt.hash(password, 10); // Hash with a salt round of 10
-        const putCommand = new PutCommand({
+        // Hash password and save credentials (remains the same)
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const putCredentialsCommand = new PutCommand({
             TableName: CREDENTIALS_TABLE,
             Item: { username: username, password: hashedPassword },
         });
-        await docClient.send(putCommand);
+        await docClient.send(putCredentialsCommand);
 
-        res.status(201).json({ message: "User registered successfully." });
+        // --- START: Replace the existing putProfileCommand block with this ---
+
+        // After creating credentials, create a corresponding user profile
+        console.log(`Creating profile for user: ${username}`);
+        const putProfileCommand = new PutCommand({
+            TableName: PROFILES_TABLE,
+            Item: {
+                username: username,
+                createdAt: new Date().toISOString(),
+                
+                // --- NEW: DV-Specific Profile Fields ---
+                // Basic demographic info (optional for the user to fill)
+                age: null, // e.g., 27
+                gender: "", // e.g., "Female"
+                relationshipStatus: "", // e.g., "Married", "Dating"
+                children: {
+                    hasChildren: false,
+                    count: 0,
+                    details: "" // e.g., "Two children, ages 4 and 6"
+                },
+                
+                // Key safety and support information
+                supportSystem: "", // User can describe their support network (e.g., "Parents, close friend")
+                emergencyContact: {
+                    name: "",
+                    phone: "",
+                    relationship: ""
+                },
+                // A place for the user to develop and store their safety plan
+                safetyPlan: {
+                    safePlace: "", // A safe location to go to in an emergency
+                    codedMessage: "", // A code word/phrase to alert friends/family
+                    importantDocuments: [], // List of documents to secure (e.g., "Passport", "Birth Certificate")
+                    notes: "" // General safety planning notes
+                },
+                riskFactors: {
+                    abuserAccessToWeapons: false, // Default to false
+                    // You can add other risk factors here in the future
+                }
+            },
+        });
+        await docClient.send(putProfileCommand);
+        // --- END: Replacement block ---
+
+        res.status(201).json({ message: "User and profile registered successfully." });
     } catch (error) {
         console.error("Registration error:", error);
         res.status(500).json({ message: "Internal server error." });
     }
 });
+
+
+
 
 // 2. User Login
 app.post("/api/login", async (req, res) => {
@@ -154,6 +202,64 @@ app.get("/api/history", authenticateToken, async (req: Request, res: Response) =
         res.status(500).json({ message: "Internal server error." });
     }
 });
+
+// === NEW: USER PROFILE ENDPOINTS ===
+
+// GET User's Profile
+app.get("/api/profile", authenticateToken, async (req: Request, res: Response) => {
+    const username = (req as any).user.username;
+    try {
+        const getCommand = new GetCommand({
+            TableName: PROFILES_TABLE,
+            Key: { username },
+        });
+        const { Item } = await docClient.send(getCommand);
+        if (!Item) {
+            return res.status(404).json({ message: "Profile not found." });
+        }
+        res.status(200).json({ profile: Item });
+    } catch (error) {
+        console.error("Error fetching profile:", error);
+        res.status(500).json({ message: "Internal server error." });
+    }
+});
+
+// UPDATE User's Profile
+app.put("/api/profile", authenticateToken, async (req: Request, res: Response) => {
+    const username = (req as any).user.username;
+    const updatedProfileData = req.body;
+
+    try {
+        // Construct the UpdateExpression and ExpressionAttributeValues dynamically
+        const updateExpressionParts = [];
+        const expressionAttributeValues = {};
+        for (const key in updatedProfileData) {
+            if (key !== 'username') { // Don't allow changing the username
+                updateExpressionParts.push(`${key} = :${key}`);
+                expressionAttributeValues[`:${key}`] = updatedProfileData[key];
+            }
+        }
+        
+        if (updateExpressionParts.length === 0) {
+            return res.status(400).json({ message: "No fields to update." });
+        }
+
+        const updateCommand = new UpdateCommand({
+            TableName: PROFILES_TABLE,
+            Key: { username },
+            UpdateExpression: `set ${updateExpressionParts.join(', ')}`,
+            ExpressionAttributeValues: expressionAttributeValues,
+            ReturnValues: "ALL_NEW", // Return the updated item
+        });
+
+        const { Attributes } = await docClient.send(updateCommand);
+        res.status(200).json({ message: "Profile updated successfully.", profile: Attributes });
+    } catch (error) {
+        console.error("Error updating profile:", error);
+        res.status(500).json({ message: "Internal server error." });
+    }
+});
+
 
 // === PROTECTED CHAT API ENDPOINTS ===
 

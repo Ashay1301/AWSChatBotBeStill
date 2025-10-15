@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import "../Chatbot.css"; // Note the path is now ../
 
 export default function ChatPage() {
@@ -166,6 +166,7 @@ export default function ChatPage() {
     return (
         <div className="chatbot-container">
             <header className="chatbot-header">
+                <Link to="/profile" className="clear-button">Profile</Link>
                 {messages.length > 0 && (
                   <button onClick={clearChat} className="clear-button">
                     Clear
