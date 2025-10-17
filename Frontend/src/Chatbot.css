@@ -275,3 +275,50 @@ code {
   display: flex;
   gap: 10px; /* Adds a nice space between buttons */
 }
+
+/* Frontend/src/Chatbot.css */
+
+.chatbot-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Horizontally centers the content */
+    justify-content: center; /* Vertically centers the container on the page */
+    min-height: 100vh;
+    background-color: #f7f7f7;
+    padding: 1rem;
+}
+
+/* ... (the rest of your styles, including the .chatbot-header and .chatbot-main changes) */
+
+.chatbot-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: #fff;
+    border-bottom: 1px solid #eee;
+    
+    /* Sticky header styles */
+    position: sticky;
+    top: 0;
+    z-index: 10;
+
+    /* --- ADD THIS --- */
+    /* Ensure the header spans the width of its container */
+    width: 100%; 
+    max-width: 800px; /* Match the max-width of the chat section */
+}
+
+.chatbot-main {
+    padding-top: 70px;
+    height: calc(100vh - 70px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+
+    /* --- ADD THIS --- */
+    width: 100%;
+    max-width: 800px; /* Match the max-width of the header */
+}
+
+/* ... (the rest of your styles) */

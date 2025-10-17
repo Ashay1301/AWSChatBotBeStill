@@ -109,13 +109,14 @@ export default function ChatPage() {
     }
 
     function clearChat() {
-        const token = localStorage.getItem('authToken');
-        fetch('http://localhost:3000/api/clear', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        setMessages([]);
-        inputRef.current?.focus();
+        // const token = localStorage.getItem('authToken');
+        // fetch('http://localhost:3000/api/clear', {
+        //     method: 'POST',
+        //     headers: { 'Authorization': `Bearer ${token}` }
+        // });
+        // setMessages([]);
+        // inputRef.current?.focus();
+        window.location.href = 'http://www.google.com';
     }
 
     // Handles when a user selects a file from the dialog
