@@ -213,6 +213,17 @@ export default function ChatPage() {
                         </h1>
                         <p>Gentle guidance. Private and supportive.</p>
                     </div>
+                    <div className="chat-messages" role="log" aria-live="polite">
+                        {messages.length === 0 && !loading ? (
+                            <HintCards />
+                        ) : (
+                            messages.map((m) => (
+                                <MessageBubble key={m.id} role={m.role} text={m.text} />
+                            ))
+                        )}
+                        {loading && <BotTyping />}
+                        <div ref={messagesEndRef} />
+                    </div>
                     <form onSubmit={sendMessage} className="chat-form">
                         <div className="chat-input-container">
                             <input
@@ -264,17 +275,7 @@ export default function ChatPage() {
                           </div>
                       </div>
                   </form>
-                    <div className="chat-messages" role="log" aria-live="polite">
-                        {messages.length === 0 && !loading ? (
-                            <HintCards />
-                        ) : (
-                            messages.map((m) => (
-                                <MessageBubble key={m.id} role={m.role} text={m.text} />
-                            ))
-                        )}
-                        {loading && <BotTyping />}
-                        <div ref={messagesEndRef} />
-                    </div>
+                    
                     <footer className="chat-footer">
                         If you’re in immediate danger, call emergency services. Your conversation is saved privately.
                     </footer>
