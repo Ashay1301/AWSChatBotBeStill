@@ -172,23 +172,14 @@ export default function ChatPage() {
         }
     };
 
+    // In Frontend/src/pages/ChatPage.js
+
     return (
         <div className="chatbot-container">
-            {/* <header className="chatbot-header">
-                <Link to="/journal" className="clear-button" style={{marginRight: '10px'}}>My Journal</Link>
-                <Link to="/profile" className="clear-button">Profile</Link>
-                {messages.length > 0 && (
-                  <button onClick={clearChat} className="clear-button">
-                    Clear
-                  </button>
-                )}
-                <button onClick={handleLogout} className="clear-button" style={{marginLeft: '10px'}}>Logout</button>
-            </header> */}
             <header className="chatbot-header">
                 <div className="header-actions-left">
                     <Link to="/journal" className="clear-button">My Journal</Link>
                 </div>
-                {/* --- TITLE ADDED HERE --- */}
                 <div className="header-title">
                 <h1>
                     <span className="brand-purple">Be</span>
@@ -209,84 +200,101 @@ export default function ChatPage() {
             </header>
             <main className="chatbot-main">
                 <section className="chatbot-section">
-                    <div className="chatbot-title">
-                        <img
-                            src="https://images.squarespace-cdn.com/content/v1/674239e221e74d6e8cd69bf6/ebf9a587-bc2b-432e-84c8-ba801ab821ff/BSF+Logo+%282%29.png?format=500w"
-                            alt="Be Still Foundation Logo"
-                            className="chatbot-logo"
-                        />
-                        <h1>
-                            <span className="brand-purple">Be</span>
-                            <span className="brand-pink">Still</span> Helper
-                        </h1>
-                        <p>Gentle guidance. Private and supportive.</p>
-                    </div>
-                    <div className="chat-messages" role="log" aria-live="polite">
-                        {messages.length === 0 && !loading ? (
-                            <HintCards />
-                        ) : (
-                            messages.map((m) => (
-                                <MessageBubble key={m.id} role={m.role} text={m.text} />
-                            ))
+                    {/* This is the new main content wrapper */}
+                    <div className="chat-content-wrapper">
+                        {/* Column 1: Chat Messages */}
+                        <div className="chat-area">
+                            <div className="chat-messages" role="log" aria-live="polite">
+                                {messages.length === 0 && !loading ? (
+                                    <div className="initial-view">
+                                        <div className="chatbot-title">
+                                            <img
+                                                src="https://images.squarespace-cdn.com/content/v1/674239e221e74d6e8cd69bf6/ebf9a587-bc2b-432e-84c8-ba801ab821ff/BSF+Logo+%282%29.png?format=500w"
+                                                alt="Be Still Foundation Logo"
+                                                className="chatbot-logo"
+                                            />
+                                            <h1>
+                                                <span className="brand-purple">Be</span>
+                                                <span className="brand-pink">Still</span> Helper
+                                            </h1>
+                                            <p>Gentle guidance. Private and supportive.</p>
+                                        </div>
+                                        <HintCards />
+                                    </div>
+                                ) : (
+                                    messages.map((m) => (
+                                        <MessageBubble key={m.id} role={m.role} text={m.text} />
+                                    ))
+                                )}
+                                {loading && <BotTyping />}
+                                <div ref={messagesEndRef} />
+                            </div>
+                            <form onSubmit={sendMessage} className="chat-form">
+                                <div className="chat-input-container">
+                                    <input
+                                        ref={inputRef}
+                                        type="text"
+                                        value={input}
+                                        onChange={(e) => setInput(e.target.value)}
+                                        placeholder={
+                                            loading
+                                                ? "Thinking…"
+                                                : "Ask about help, safety, or emotional support…"
+                                        }
+                                        className="chat-input"
+                                        aria-label="Message"
+                                    />
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        onChange={handleFileChange}
+                                        style={{ display: 'none' }}
+                                        accept=".txt,.pdf,.doc,.docx"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => fileInputRef.current.click()}
+                                        className="upload-button"
+                                        title="Upload a document for analysis"
+                                    >
+                                    📎
+                                    </button>
+                                    <div className="chat-actions">
+                                    {loading ? (
+                                        <div className="spinner" />
+                                    ) : (
+                                        selectedFile ? (
+                                            <button onClick={handleFileUpload} type="button" className="send-button">
+                                                Upload
+                                            </button>
+                                        ) : (
+                                            <button
+                                                type="submit"
+                                                className="send-button"
+                                                disabled={!input.trim()}
+                                            >
+                                                Send
+                                            </button>
+                                        )
+                                    )}
+                                </div>
+                            </div>
+                        </form>
+                        <footer className="chat-footer">
+                            If you’re in immediate danger, call emergency services. Your conversation is saved privately.
+                        </footer>
+                        </div>
+                        {/* Column 2: Sidebar with Hint Cards (only appears after chat starts) */}
+                        {messages.length > 0 && (
+                            <aside className="sidebar-area">
+                                <HintCards />
+                            </aside>
                         )}
-                        {loading && <BotTyping />}
-                        <div ref={messagesEndRef} />
+                        
                     </div>
-                    <form onSubmit={sendMessage} className="chat-form">
-                        <div className="chat-input-container">
-                            <input
-                                ref={inputRef}
-                                type="text"
-                                value={input}
-                                onChange={(e) => setInput(e.target.value)}
-                                placeholder={
-                                    loading
-                                        ? "Thinking…"
-                                        : "Ask about help, safety, or emotional support…"
-                                }
-                                className="chat-input"
-                                aria-label="Message"
-                            />
-                            <input
-                                type="file"
-                                ref={fileInputRef}
-                                onChange={handleFileChange}
-                                style={{ display: 'none' }}
-                                accept=".txt,.pdf,.doc,.docx"
-                            />
-                            <button
-                                type="button"
-                                onClick={() => fileInputRef.current.click()}
-                                className="upload-button"
-                                title="Upload a document for analysis"
-                            >
-                              📎 
-                            </button>
-                            <div className="chat-actions">
-                              {loading ? (
-                                  <div className="spinner" />
-                              ) : (
-                                  selectedFile ? (
-                                      <button onClick={handleFileUpload} type="button" className="send-button">
-                                          Upload
-                                      </button>
-                                  ) : (
-                                      <button
-                                          type="submit"
-                                          className="send-button"
-                                          disabled={!input.trim()}
-                                      >
-                                          Send
-                                      </button>
-                                  )
-                              )}
-                          </div>
-                      </div>
-                  </form>
                     
-                    <footer className="chat-footer">
-                        If you’re in immediate danger, call emergency services. Your conversation is saved privately.
-                    </footer>
+
+                    
                 </section>
             </main>
         </div>
@@ -322,24 +330,36 @@ function HintCards() {
       {
         title: "Safety planning",
         text: "Learn how to prepare important items, safe spaces, and trusted contacts.",
+        URL: "https://www.be-still-foundation.com/founding-attorney-network"
     
       },
       {
         title: "Support network",
         text: "Find shelters, hotlines, or emotional help near you.",
+        URL: "https://www.be-still-foundation.com/donate"
       },
       {
         title: "Know your rights",
         text: "Get general information on protective measures and reporting options.",
+        URL: "https://www.womenslaw.org"
       },
     ];
     return (
       <div className="hint-grid">
         {items.map((it) => (
-          <div key={it.title} className="hint-card">
-            <div className="hint-title">{it.title}</div>
-            <div className="hint-text">{it.text}</div>
-          </div>
+          // Each card is now a link that opens in a new tab
+          <a
+            key={it.title}
+            href={it.URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hint-card-link"
+          >
+            <div className="hint-card">
+              <div className="hint-title">{it.title}</div>
+              <div className="hint-text">{it.text}</div>
+            </div>
+          </a>
         ))}
       </div>
     );
