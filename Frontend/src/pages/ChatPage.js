@@ -23,7 +23,7 @@ export default function ChatPage() {
         const fetchHistory = async () => {
             setLoading(true);
             try {
-                const response = await fetch('http://localhost:3000/api/history', {
+                const response = await fetch(`${API_URL}/api/history`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
@@ -80,7 +80,7 @@ export default function ChatPage() {
 
         try {
             const token = localStorage.getItem('authToken');
-            const response = await fetch('http://localhost:3000/api/chat', {
+            const response = await fetch(`${API_URL}/api/chat`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -141,7 +141,7 @@ export default function ChatPage() {
 
         try {
             const token = localStorage.getItem('authToken');
-            const response = await fetch('http://localhost:3000/api/analyze', {
+            const response = await fetch(`${API_URL}/api/analyze`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`

@@ -54,7 +54,7 @@ export default function ProfilePage() {
         setError('');
         setSuccess('');
         try {
-            const response = await fetch('http://localhost:3000/api/profile', {
+            const response = await fetch(`${API_URL}/api/profile`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
