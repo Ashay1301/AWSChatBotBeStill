@@ -213,6 +213,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ChatPage from './pages/ChatPage';
 import ProfilePage from './pages/ProfilePage';
+import JournalPage from './pages/JournalPage';
 
 function App() {
   return (
@@ -223,6 +224,7 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/journal" element={<JournalPage />} />
       </Routes>
     </Router>
   );

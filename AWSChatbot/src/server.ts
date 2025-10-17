@@ -3,7 +3,7 @@ import cors from "cors";
 import { invokeTitan, type ChatMessage } from "./bedrockClient.js";
 import { createObjectCsvWriter } from 'csv-writer';
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, GetCommand, UpdateCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, GetCommand, UpdateCommand, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import multer from 'multer';
@@ -24,6 +24,7 @@ const docClient = DynamoDBDocumentClient.from(client);
 const HISTORY_TABLE = "ChatBotBeStill";
 const CREDENTIALS_TABLE = "ChatbotCredentials";
 const PROFILES_TABLE = "UserProfiles";
+const JOURNAL_TABLE = "JournalEntries";
 const JWT_SECRET = "your_super_secret_key_change_this"; // IMPORTANT: Change this to a long, random string
 
 // === DATA ENTRY LOGIC (Unchanged) ===
@@ -165,6 +166,8 @@ app.post("/api/login", async (req, res) => {
 
 
 
+
+
 // === NEW: AUTHENTICATION MIDDLEWARE ===
 // This function checks for a valid token before allowing access to protected routes
 const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
@@ -199,6 +202,70 @@ app.get("/api/history", authenticateToken, async (req: Request, res: Response) =
         res.status(200).json({ history: conversationHistory });
     } catch (error) {
         console.error("Error fetching history:", error);
+        res.status(500).json({ message: "Internal server error." });
+    }
+});
+
+// === NEW: JOURNALING ENDPOINTS ===
+
+/// CREATE a new journal entry
+app.post("/api/journal", authenticateToken, async (req: Request, res: Response) => {
+    const username = (req as any).user.username;
+    // Expect a more detailed object from the frontend
+    const { title, content, eventDate, incidentDetails } = req.body;
+
+    if (!title || !content || !eventDate || !incidentDetails) {
+        return res.status(400).json({ message: "All journal fields are required." });
+    }
+
+    try {
+        const newEntry = {
+            username: username,
+            entryTimestamp: new Date().toISOString(),
+            title: title,
+            content: content,
+            eventDate: eventDate,
+            // --- NEW: Storing the detailed incident object ---
+            details: {
+                typeOfAbuse: incidentDetails.typeOfAbuse || [],
+                childrenPresent: incidentDetails.childrenPresent || false,
+                weaponInvolved: incidentDetails.weaponInvolved || false,
+                injuryOccurred: incidentDetails.injuryOccurred || false,
+                injuryDescription: incidentDetails.injuryDescription || "",
+                evidenceAvailable: incidentDetails.evidenceAvailable || [],
+                policeReportNumber: incidentDetails.policeReportNumber || "",
+            }
+        };
+
+        const putCommand = new PutCommand({
+            TableName: JOURNAL_TABLE,
+            Item: newEntry,
+        });
+        await docClient.send(putCommand);
+
+        res.status(201).json({ message: "Journal entry saved successfully.", entry: newEntry });
+    } catch (error) {
+        console.error("Error saving journal entry:", error);
+        res.status(500).json({ message: "Internal server error." });
+    }
+});
+
+// GET all journal entries for the logged-in user
+app.get("/api/journal", authenticateToken, async (req: Request, res: Response) => {
+    const username = (req as any).user.username;
+    try {
+        const queryCommand = new QueryCommand({
+            TableName: JOURNAL_TABLE,
+            KeyConditionExpression: "username = :username",
+            ExpressionAttributeValues: { ":username": username },
+            // Optional: sort the results with the newest entries first
+            ScanIndexForward: false,
+        });
+
+        const { Items } = await docClient.send(queryCommand);
+        res.status(200).json({ journalEntries: Items || [] });
+    } catch (error) {
+        console.error("Error fetching journal entries:", error);
         res.status(500).json({ message: "Internal server error." });
     }
 });

@@ -261,3 +261,17 @@ code {
 .upload-button:hover {
   color: #6a1b9a;
 }
+
+/* Add this to your Chatbot.css file */
+
+.chatbot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-actions-left,
+.header-actions-right {
+  display: flex;
+  gap: 10px; /* Adds a nice space between buttons */
+}

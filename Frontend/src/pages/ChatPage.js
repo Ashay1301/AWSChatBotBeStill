@@ -66,6 +66,13 @@ export default function ChatPage() {
         const trimmed = input.trim();
         if (!trimmed || loading) return;
 
+        // --- ADD THIS BLOCK ---
+        // Check for the "new entry" trigger phrase
+        if (trimmed.toLowerCase() === 'new entry') {
+            navigate('/journal'); // Redirect to the journal page
+            return; // Stop the function here
+        }
+
         const userMsg = { id: crypto.randomUUID(), role: "user", text: trimmed };
         setMessages((m) => [...m, userMsg]);
         setInput("");
@@ -165,7 +172,8 @@ export default function ChatPage() {
 
     return (
         <div className="chatbot-container">
-            <header className="chatbot-header">
+            {/* <header className="chatbot-header">
+                <Link to="/journal" className="clear-button" style={{marginRight: '10px'}}>My Journal</Link>
                 <Link to="/profile" className="clear-button">Profile</Link>
                 {messages.length > 0 && (
                   <button onClick={clearChat} className="clear-button">
@@ -173,6 +181,22 @@ export default function ChatPage() {
                   </button>
                 )}
                 <button onClick={handleLogout} className="clear-button" style={{marginLeft: '10px'}}>Logout</button>
+            </header> */}
+            <header className="chatbot-header">
+                <div className="header-actions-left">
+                    <Link to="/journal" className="clear-button">My Journal</Link>
+                </div>
+                <div className="header-actions-right">
+                    <Link to="/profile" className="clear-button">Profile</Link>
+                    {messages.length > 0 && (
+                        <button onClick={clearChat} className="clear-button">
+                            Clear
+                        </button>
+                    )}
+                    <button onClick={handleLogout} className="clear-button">
+                        Logout
+                    </button>
+                </div>
             </header>
             <main className="chatbot-main">
                 <section className="chatbot-section">
