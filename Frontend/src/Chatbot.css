@@ -60,6 +60,19 @@ body {
   border-color: #b39dba;
 }
 
+.header-title{
+    flex-shrink: 0;
+    
+}
+
+.header-title h1 {
+  font-size: 1.7rem; /* Makes the font a suitable size for the header */
+  margin: 0; /* Removes default H1 margin to prevent spacing issues */
+  color: #5b2c6f; /* Sets the color for the "Helper" text */
+  font-weight: 1000;
+  white-space: nowrap; /* Prevents wrapping */
+}
+
 /* Main Content Area */
 .chatbot-main {
   flex: 1;

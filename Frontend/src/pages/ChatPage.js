@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, href } from 'react-router-dom';
 import "../Chatbot.css"; // Note the path is now ../
 
 export default function ChatPage() {
@@ -117,6 +117,7 @@ export default function ChatPage() {
         // setMessages([]);
         // inputRef.current?.focus();
         window.location.href = 'http://www.google.com';
+        handleLogout();
     }
 
     // Handles when a user selects a file from the dialog
@@ -186,6 +187,13 @@ export default function ChatPage() {
             <header className="chatbot-header">
                 <div className="header-actions-left">
                     <Link to="/journal" className="clear-button">My Journal</Link>
+                </div>
+                {/* --- TITLE ADDED HERE --- */}
+                <div className="header-title">
+                <h1>
+                    <span className="brand-purple">Be</span>
+                    <span className="brand-pink">Still</span> Helper
+                </h1>
                 </div>
                 <div className="header-actions-right">
                     <Link to="/profile" className="clear-button">Profile</Link>
@@ -314,6 +322,7 @@ function HintCards() {
       {
         title: "Safety planning",
         text: "Learn how to prepare important items, safe spaces, and trusted contacts.",
+    
       },
       {
         title: "Support network",
