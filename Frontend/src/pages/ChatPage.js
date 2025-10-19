@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, Link, href } from 'react-router-dom';
 import "../Chatbot.css"; // Note the path is now ../
+import { API_URL } from '../config'; // Import the API_URL from config.js
 
 export default function ChatPage() {
     const [messages, setMessages] = useState([]);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import './JournalPage.css'; // We'll create this CSS file
+import { API_URL } from '../config'; // Import the API_URL from config.js
 
 export default function JournalPage() {
     const [entries, setEntries] = useState([]);

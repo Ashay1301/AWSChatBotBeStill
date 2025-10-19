@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './AuthForm.css';
+import { API_URL } from '../config'; // Import the API_URL from config.js
 
 export default function RegisterPage() {
     const [username, setUsername] = useState('');
