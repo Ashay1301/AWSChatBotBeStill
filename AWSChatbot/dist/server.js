@@ -14,7 +14,7 @@ const upload = multer({ storage: storage });
 // === EXPRESS SETUP ===
 const app = express();
 const port = 3000;
-app.use(cors({ origin: '*' }));
+app.use(cors({ origin: 'https://main.djyqwqvqsc00d.amplifyapp.com' }));
 app.use(express.json());
 // === DYNAMODB & SECURITY SETUP ===
 const client = new DynamoDBClient({});
