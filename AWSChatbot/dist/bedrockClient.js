@@ -85,7 +85,6 @@ export async function invokeTitan(history) {
         console.error("ERROR: Failed to invoke model.", error);
         throw new Error("Failed to invoke model.");
     }
-    // Add this new function to src/bedrockClient.ts
     /**
      * Invokes the Titan model to analyze the content of a document.
      * @param documentContent - The text content of the uploaded file.
