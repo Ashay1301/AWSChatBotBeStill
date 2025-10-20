@@ -15,8 +15,8 @@ const upload = multer({ storage: storage });
 // === EXPRESS SETUP ===
 const app = express();
 const port = 3000;
-app.use(cors({origin: 'https://main.d3llghdasq2y64.amplifyapp.com'}));
-// app.use(cors({origin: '*'}));
+// app.use(cors({origin: 'https://main.d3llghdasq2y64.amplifyapp.com'}));
+app.use(cors({origin: '*'}));
 app.use(express.json());
 
 // === DYNAMODB & SECURITY SETUP ===
@@ -169,7 +169,7 @@ app.post("/api/login", async (req, res) => {
 
 
 
-// === NEW: AUTHENTICATION MIDDLEWARE ===
+// === AUTHENTICATION MIDDLEWARE ===
 // This function checks for a valid token before allowing access to protected routes
 const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers['authorization'];
@@ -207,7 +207,7 @@ app.get("/api/history", authenticateToken, async (req: Request, res: Response) =
     }
 });
 
-// === NEW: JOURNALING ENDPOINTS ===
+// === JOURNALING ENDPOINTS ===
 
 /// CREATE a new journal entry
 app.post("/api/journal", authenticateToken, async (req: Request, res: Response) => {
@@ -271,7 +271,7 @@ app.get("/api/journal", authenticateToken, async (req: Request, res: Response) =
     }
 });
 
-// === NEW: USER PROFILE ENDPOINTS ===
+// === USER PROFILE ENDPOINTS ===
 
 // GET User's Profile
 app.get("/api/profile", authenticateToken, async (req: Request, res: Response) => {
@@ -397,7 +397,7 @@ app.post("/api/chat", authenticateToken, async (req: Request, res: Response) => 
     }
 });
 
-// === NEW: FILE ANALYSIS ENDPOINT ===
+// === FILE ANALYSIS ENDPOINT ===
 app.post("/api/analyze", authenticateToken, upload.single('document'), async (req: Request, res: Response) => {
     if (!req.file) {
         return res.status(400).json({ message: "No file uploaded." });
