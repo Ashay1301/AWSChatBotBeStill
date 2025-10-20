@@ -106,7 +106,7 @@ export async function invokeTitan(history: ChatMessage[]): Promise<string> {
     throw new Error("Failed to invoke model.");
   }
 
-  // Add this new function to src/bedrockClient.ts
+
 
 /**
  * Invokes the Titan model to analyze the content of a document.
