@@ -15,7 +15,7 @@ const upload = multer({ storage: storage });
 const allowedOrigins = ['https://main.d1eow5fsdmo56z.amplifyapp.com','http://localhost:3001'];
 // === EXPRESS SETUP ===
 const app = express();
-const port = 3000;
+const PORT = process.env.PORT || 3001;
 app.use(cors({origin: allowedOrigins}));
 // app.use(cors({origin: '*'}));
 app.use(express.json());
@@ -450,6 +450,6 @@ app.post("/api/clear", authenticateToken, async (req: Request, res: Response) =>
 
 
 
-app.listen(port, () => {
-    console.log(`✅ Server is running and ready for requests at http://localhost:${port}`);
+app.listen(PORT, () => {
+    console.log(`✅ Server is running and ready for requests at http://localhost:${PORT}`);
 });
