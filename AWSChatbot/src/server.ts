@@ -27,7 +27,14 @@ const HISTORY_TABLE = "ChatBotBeStill";
 const CREDENTIALS_TABLE = "ChatbotCredentials";
 const PROFILES_TABLE = "UserProfiles";
 const JOURNAL_TABLE = "JournalEntries";
-const JWT_SECRET = "your_super_secret_key_change_this"; // IMPORTANT: Change this to a long, random string
+const JWT_SECRET = process.env.JWT_SECRET;
+
+// This will make the server crash on purpose if you forget the variable,
+// which makes it much easier to debug.
+if (!JWT_SECRET) {
+    console.error("FATAL ERROR: JWT_SECRET environment variable is not set.");
+    process.exit(1);
+}
 
 // === DATA ENTRY LOGIC (Unchanged) ===
 let isDataEntryMode = false;
