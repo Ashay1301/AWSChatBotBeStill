@@ -12,10 +12,11 @@ import { analyzeDocument } from './bedrockClient.js'; // Make sure this is impor
 // Configure multer for in-memory file storage
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+const allowedOrigins = ['https://main.d1eow5fsdmo56z.amplifyapp.com','http://localhost:3001'];
 // === EXPRESS SETUP ===
 const app = express();
 const port = 3000;
-app.use(cors({origin: 'https://main.d1eow5fsdmo56z.amplifyapp.com'}));
+app.use(cors({origin: allowedOrigins}));
 // app.use(cors({origin: '*'}));
 app.use(express.json());
 
