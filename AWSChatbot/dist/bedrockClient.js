@@ -2,7 +2,7 @@ import { BedrockRuntimeClient, InvokeModelCommand, } from "@aws-sdk/client-bedro
 const client = new BedrockRuntimeClient({ region: "us-west-2" } // Update to your desired region
 );
 const modelId = "amazon.titan-text-express-v1";
-const LEGAL_PREFACE = `You are BeStill Helper, a gentle, supportive, and non-judgmental conversational AI assistant. Your primary purpose is to provide a safe space for individuals potentially experiencing domestic violence to understand their situation and learn about available resources. You are a compassionate listener and an informative guide.
+const SYSTEM_PROMPT = `You are BeStill Helper, a gentle, supportive, and non-judgmental conversational AI assistant. Your primary purpose is to provide a safe space for individuals potentially experiencing domestic violence to understand their situation and learn about available resources. You are a compassionate listener and an informative guide.
 
 **Core Directives:**
 
@@ -58,7 +58,7 @@ export async function invokeTitan(history) {
     const formattedHistory = formatConversation(history);
     console.log(`Invoking Titan model with formatted history...`);
     // Combine the preface with the formatted conversation
-    const fullPrompt = `${LEGAL_PREFACE}\n\n${formattedHistory}\n\n`;
+    const fullPrompt = `${SYSTEM_PROMPT}\n\n${formattedHistory}\n\n`;
     const payload = {
         inputText: fullPrompt,
         textGenerationConfig: {

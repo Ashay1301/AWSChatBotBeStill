@@ -15,12 +15,12 @@ const upload = multer({ storage: storage });
 // === EXPRESS SETUP ===
 const app = express();
 const port = 3000;
-// app.use(cors({origin: 'https://main.d3llghdasq2y64.amplifyapp.com'}));
-app.use(cors({origin: '*'}));
+app.use(cors({origin: 'https://main.d3llghdasq2y64.amplifyapp.com'}));
+// app.use(cors({origin: '*'}));
 app.use(express.json());
 
 // === DYNAMODB & SECURITY SETUP ===
-const client = new DynamoDBClient({region: "us-west-2"});
+const client = new DynamoDBClient({region: "us-west-1"});
 const docClient = DynamoDBDocumentClient.from(client);
 const HISTORY_TABLE = "ChatBotBeStill";
 const CREDENTIALS_TABLE = "ChatbotCredentials";

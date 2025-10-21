@@ -14,11 +14,11 @@ const upload = multer({ storage: storage });
 // === EXPRESS SETUP ===
 const app = express();
 const port = 3000;
-app.use(cors({ origin: 'https://main.d3llghdasq2y64.amplifyapp.com' }));
-// app.use(cors({origin: '*'}));
+// app.use(cors({origin: 'https://main.d3llghdasq2y64.amplifyapp.com'}));
+app.use(cors({ origin: '*' }));
 app.use(express.json());
 // === DYNAMODB & SECURITY SETUP ===
-const client = new DynamoDBClient({ region: "us-west-2" });
+const client = new DynamoDBClient({ region: "us-west-1" });
 const docClient = DynamoDBDocumentClient.from(client);
 const HISTORY_TABLE = "ChatBotBeStill";
 const CREDENTIALS_TABLE = "ChatbotCredentials";
@@ -142,7 +142,7 @@ app.post("/api/login", async (req, res) => {
         res.status(500).json({ message: "Internal server error." });
     }
 });
-// === NEW: AUTHENTICATION MIDDLEWARE ===
+// === AUTHENTICATION MIDDLEWARE ===
 // This function checks for a valid token before allowing access to protected routes
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
@@ -176,7 +176,7 @@ app.get("/api/history", authenticateToken, async (req, res) => {
         res.status(500).json({ message: "Internal server error." });
     }
 });
-// === NEW: JOURNALING ENDPOINTS ===
+// === JOURNALING ENDPOINTS ===
 /// CREATE a new journal entry
 app.post("/api/journal", authenticateToken, async (req, res) => {
     const username = req.user.username;
@@ -234,7 +234,7 @@ app.get("/api/journal", authenticateToken, async (req, res) => {
         res.status(500).json({ message: "Internal server error." });
     }
 });
-// === NEW: USER PROFILE ENDPOINTS ===
+// === USER PROFILE ENDPOINTS ===
 // GET User's Profile
 app.get("/api/profile", authenticateToken, async (req, res) => {
     const username = req.user.username;
@@ -346,7 +346,7 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
         res.status(500).json({ error: "Failed to process the chat request." });
     }
 });
-// === NEW: FILE ANALYSIS ENDPOINT ===
+// === FILE ANALYSIS ENDPOINT ===
 app.post("/api/analyze", authenticateToken, upload.single('document'), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ message: "No file uploaded." });
