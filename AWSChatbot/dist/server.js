@@ -14,7 +14,7 @@ const upload = multer({ storage: storage });
 const allowedOrigins = ['https://main.d1eow5fsdmo56z.amplifyapp.com', 'http://localhost:3001'];
 // === EXPRESS SETUP ===
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 app.use(cors({ origin: allowedOrigins }));
 // app.use(cors({origin: '*'}));
 app.use(express.json());
@@ -25,7 +25,8 @@ const HISTORY_TABLE = "ChatBotBeStill";
 const CREDENTIALS_TABLE = "ChatbotCredentials";
 const PROFILES_TABLE = "UserProfiles";
 const JOURNAL_TABLE = "JournalEntries";
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = "your_super_secret_key_change_this";
+// const JWT_SECRET = process.env.JWT_SECRET;
 // This will make the server crash on purpose if you forget the variable,
 // which makes it much easier to debug.
 if (!JWT_SECRET) {
