@@ -15,7 +15,7 @@ const upload = multer({ storage: storage });
 const allowedOrigins = ['https://main.d1eow5fsdmo56z.amplifyapp.com','http://localhost:3001'];
 // === EXPRESS SETUP ===
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 app.use(cors({origin: allowedOrigins}));
 // app.use(cors({origin: '*'}));
 app.use(express.json());
