@@ -457,6 +457,9 @@ app.post("/api/clear", authenticateToken, async (req: Request, res: Response) =>
     res.status(200).json({ message: `History cleared for ${userId}.` });
 });
 
+app.get("/", (req, res) => {
+    res.status(200).send("OK");
+});
 
 
 app.listen(PORT, () => {
