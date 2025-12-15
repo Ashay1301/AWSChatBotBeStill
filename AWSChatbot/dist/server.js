@@ -1,4 +1,4 @@
-import express, {} from "express";
+import express from "express";
 import cors from "cors";
 import { invokeTitan } from "./bedrockClient.js";
 import { createObjectCsvWriter } from 'csv-writer';
@@ -11,22 +11,36 @@ import { analyzeDocument } from './bedrockClient.js'; // Make sure this is impor
 // Configure multer for in-memory file storage
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
-const allowedOrigins = ['https://main.d1eow5fsdmo56z.amplifyapp.com', 'http://localhost:3001'];
 // === EXPRESS SETUP ===
 const app = express();
 const PORT = process.env.PORT || 3000;
-app.use(cors({ origin: allowedOrigins }));
-// app.use(cors({origin: '*'}));
+// CORS Configuration - Allow frontend origin
+const allowedOrigins = [
+    process.env.FRONTEND_URL || 'http://localhost:3001',
+    'http://localhost:3001'
+];
+app.use(cors({
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        }
+        else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true
+}));
 app.use(express.json());
 // === DYNAMODB & SECURITY SETUP ===
-const client = new DynamoDBClient({ region: "us-west-2" });
+// DynamoDB tables are in us-west-1 per README
+const client = new DynamoDBClient({ region: process.env.DYNAMODB_REGION || "us-west-1" });
 const docClient = DynamoDBDocumentClient.from(client);
 const HISTORY_TABLE = "ChatBotBeStill";
 const CREDENTIALS_TABLE = "ChatbotCredentials";
 const PROFILES_TABLE = "UserProfiles";
 const JOURNAL_TABLE = "JournalEntries";
-const JWT_SECRET = "your_super_secret_key_change_this";
-// const JWT_SECRET = process.env.JWT_SECRET;
+// JWT Secret - MUST be set via environment variable in production
+const JWT_SECRET = process.env.JWT_SECRET || "your_super_secret_key_change_this";
 // This will make the server crash on purpose if you forget the variable,
 // which makes it much easier to debug.
 if (!JWT_SECRET) {
@@ -306,11 +320,16 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
         // --- Data Entry Logic ---
         if (isDataEntryMode) {
             const currentQuestion = entryQuestions[currentQuestionIndex];
+            if (!currentQuestion) {
+                return res.status(500).json({ error: "Invalid question index." });
+            }
             newEntryData[currentQuestion.id] = prompt;
             currentQuestionIndex++;
             if (currentQuestionIndex < entryQuestions.length) {
-                const nextQuestion = entryQuestions[currentQuestionIndex].question;
-                res.status(200).json({ response: nextQuestion });
+                const nextQuestion = entryQuestions[currentQuestionIndex];
+                if (nextQuestion) {
+                    res.status(200).json({ response: nextQuestion.question });
+                }
             }
             else {
                 await appendToCsv(newEntryData);
@@ -332,8 +351,10 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
         }
         if (prompt.toLowerCase().trim() === 'new entry') {
             isDataEntryMode = true;
-            const firstQuestion = entryQuestions[0].question;
-            res.status(200).json({ response: firstQuestion });
+            const firstQuestion = entryQuestions[0];
+            if (firstQuestion) {
+                res.status(200).json({ response: firstQuestion.question });
+            }
             return;
         }
         const getCommand = new GetCommand({ TableName: HISTORY_TABLE, Key: { userId } });
@@ -394,6 +415,9 @@ app.post("/api/clear", authenticateToken, async (req, res) => {
     await docClient.send(updateCommand);
     resetDataEntry();
     res.status(200).json({ message: `History cleared for ${userId}.` });
+});
+app.get("/", (req, res) => {
+    res.status(200).send("OK");
 });
 app.listen(PORT, () => {
     console.log(`✅ Server is running and ready for requests at http://localhost:${PORT}`);

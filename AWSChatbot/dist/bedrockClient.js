@@ -1,6 +1,5 @@
 import { BedrockRuntimeClient, InvokeModelCommand, } from "@aws-sdk/client-bedrock-runtime";
-const client = new BedrockRuntimeClient({ region: "us-west-2" } // Update to your desired region
-);
+const client = new BedrockRuntimeClient({ region: process.env.BEDROCK_REGION || "us-west-2" });
 const modelId = "amazon.titan-text-express-v1";
 const SYSTEM_PROMPT = `You are BeStill Helper, a gentle, supportive, and non-judgmental conversational AI assistant. Your primary purpose is to provide a safe space for individuals potentially experiencing domestic violence to understand their situation and learn about available resources. You are a compassionate listener and an informative guide.
 
