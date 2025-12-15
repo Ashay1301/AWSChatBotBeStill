@@ -1,0 +1,32 @@
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+
+# Node
+node_modules/
+npm-debug.log
+
+# Source files (we only need compiled dist/)
+src/
+
+# TypeScript config
+tsconfig.json
+
+# Development files
+*.md
+.DS_Store
+.env
+.env.example
+
+# Old deployment files
+backend-deployment-*.zip
+
+# CSV files (if used for testing)
+*.csv
+
+# Old server versions
+server_old.ts
+server_non_login.ts
+server_with_entry.ts
+index_old.html

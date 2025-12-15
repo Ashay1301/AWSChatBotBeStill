@@ -4,14 +4,14 @@ import {
 } from "@aws-sdk/client-bedrock-runtime";
 
 // Define a type for our chat messages for better code quality
-export type { ChatMessage }; 
+export type { ChatMessage };
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
 }
 
 const client = new BedrockRuntimeClient(
-    { region: "us-west-2" } // Update to your desired region
+  { region: process.env.BEDROCK_REGION || "us-west-2" }
 );
 const modelId = "amazon.titan-text-express-v1";
 
@@ -98,7 +98,7 @@ export async function invokeTitan(history: ChatMessage[]): Promise<string> {
     const decodedResponseBody = new TextDecoder().decode(apiResponse.body);
     const responseBody = JSON.parse(decodedResponseBody);
     const generatedText = responseBody.results[0].outputText;
-    
+
     return generatedText.trim();
 
   } catch (error) {
@@ -108,11 +108,11 @@ export async function invokeTitan(history: ChatMessage[]): Promise<string> {
 
 
 
-/**
- * Invokes the Titan model to analyze the content of a document.
- * @param documentContent - The text content of the uploaded file.
- * @returns The model's analysis of the document.
- */
+  /**
+   * Invokes the Titan model to analyze the content of a document.
+   * @param documentContent - The text content of the uploaded file.
+   * @returns The model's analysis of the document.
+   */
 
 }
 

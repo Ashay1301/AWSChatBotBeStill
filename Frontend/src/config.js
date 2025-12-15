@@ -1,10 +1,8 @@
 const isProduction = process.env.NODE_ENV === 'production';
 
-// Define your URLs
+// Deployed backend URL
 const developmentApiUrl = 'http://localhost:3000';
-const productionApiUrl = 'http://54.189.14.138'; // Using IP with HTTP - workaround for SSL issues
+const productionApiUrl = 'http://bestill-prod-env.eba-vvcdpu3q.us-west-1.elasticbeanstalk.com';
 
 // Export the correct URL based on the environment
-export const API_URL = isProduction ? productionApiUrl : developmentApiUrl;
-
-// export const API_URL = developmentApiUrl; 
+export const API_URL = isProduction ? productionApiUrl : developmentApiUrl; 

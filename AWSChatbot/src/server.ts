@@ -12,24 +12,38 @@ import { analyzeDocument } from './bedrockClient.js'; // Make sure this is impor
 // Configure multer for in-memory file storage
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
-const allowedOrigins = ['https://main.d1eow5fsdmo56z.amplifyapp.com','http://localhost:3001'];
 // === EXPRESS SETUP ===
 const app = express();
 const PORT = process.env.PORT || 3000;
-app.use(cors({origin: allowedOrigins}));
-// app.use(cors({origin: '*'}));
+
+// CORS Configuration - Allow frontend origin
+const allowedOrigins = [
+    process.env.FRONTEND_URL || 'http://localhost:3001',
+    'http://localhost:3001'
+];
+app.use(cors({
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true
+}));
 app.use(express.json());
 
 // === DYNAMODB & SECURITY SETUP ===
-const client = new DynamoDBClient({region: "us-west-2"});
+// DynamoDB tables are in us-west-1 per README
+const client = new DynamoDBClient({ region: process.env.DYNAMODB_REGION || "us-west-1" });
 const docClient = DynamoDBDocumentClient.from(client);
 const HISTORY_TABLE = "ChatBotBeStill";
 const CREDENTIALS_TABLE = "ChatbotCredentials";
 const PROFILES_TABLE = "UserProfiles";
 const JOURNAL_TABLE = "JournalEntries";
 
-const JWT_SECRET = "your_super_secret_key_change_this";
-// const JWT_SECRET = process.env.JWT_SECRET;
+// JWT Secret - MUST be set via environment variable in production
+const JWT_SECRET = process.env.JWT_SECRET || "your_super_secret_key_change_this";
 
 // This will make the server crash on purpose if you forget the variable,
 // which makes it much easier to debug.
@@ -102,7 +116,7 @@ app.post("/api/register", async (req, res) => {
             Item: {
                 username: username,
                 createdAt: new Date().toISOString(),
-                
+
                 // --- NEW: DV-Specific Profile Fields ---
                 // Basic demographic info (optional for the user to fill)
                 age: null, // e.g., 27
@@ -113,7 +127,7 @@ app.post("/api/register", async (req, res) => {
                     count: 0,
                     details: "" // e.g., "Two children, ages 4 and 6"
                 },
-                
+
                 // Key safety and support information
                 supportSystem: "", // User can describe their support network (e.g., "Parents, close friend")
                 emergencyContact: {
@@ -309,15 +323,15 @@ app.put("/api/profile", authenticateToken, async (req: Request, res: Response) =
 
     try {
         // Construct the UpdateExpression and ExpressionAttributeValues dynamically
-        const updateExpressionParts = [];
-        const expressionAttributeValues = {};
+        const updateExpressionParts: string[] = [];
+        const expressionAttributeValues: Record<string, any> = {};
         for (const key in updatedProfileData) {
             if (key !== 'username') { // Don't allow changing the username
                 updateExpressionParts.push(`${key} = :${key}`);
                 expressionAttributeValues[`:${key}`] = updatedProfileData[key];
             }
         }
-        
+
         if (updateExpressionParts.length === 0) {
             return res.status(400).json({ message: "No fields to update." });
         }
@@ -346,23 +360,28 @@ app.post("/api/chat", authenticateToken, async (req: Request, res: Response) => 
     // We now get the userId from the authenticated token, not the request body
     const userId = (req as any).user.username;
     const { prompt } = req.body;
-    
+
     // (The rest of the chat logic remains exactly the same as before)
     // ...
     try {
         // --- Data Entry Logic ---
         if (isDataEntryMode) {
             const currentQuestion = entryQuestions[currentQuestionIndex];
+            if (!currentQuestion) {
+                return res.status(500).json({ error: "Invalid question index." });
+            }
             newEntryData[currentQuestion.id] = prompt;
             currentQuestionIndex++;
 
             if (currentQuestionIndex < entryQuestions.length) {
-                const nextQuestion = entryQuestions[currentQuestionIndex].question;
-                res.status(200).json({ response: nextQuestion });
+                const nextQuestion = entryQuestions[currentQuestionIndex];
+                if (nextQuestion) {
+                    res.status(200).json({ response: nextQuestion.question });
+                }
             } else {
                 await appendToCsv(newEntryData);
                 const confirmationMessage = "Thank you. I have saved the new entry. How else can I help?";
-                
+
                 const getCommand = new GetCommand({ TableName: HISTORY_TABLE, Key: { userId } });
                 const { Item } = await docClient.send(getCommand);
                 let conversationHistory: ChatMessage[] = Item?.history || [];
@@ -382,8 +401,10 @@ app.post("/api/chat", authenticateToken, async (req: Request, res: Response) => 
 
         if (prompt.toLowerCase().trim() === 'new entry') {
             isDataEntryMode = true;
-            const firstQuestion = entryQuestions[0].question;
-            res.status(200).json({ response: firstQuestion });
+            const firstQuestion = entryQuestions[0];
+            if (firstQuestion) {
+                res.status(200).json({ response: firstQuestion.question });
+            }
             return;
         }
 
